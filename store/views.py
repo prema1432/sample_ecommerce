@@ -5,8 +5,8 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from store.models import Category, Product
-from store.serializers import CategorySerilizers, ProductSerilizers, ProductSerilizersPOST
+from store.models import Category, Product, Order
+from store.serializers import CategorySerilizers, ProductSerilizers, ProductSerilizersPOST, OrderSerilizers
 
 
 class CategoryAPI(APIView):
@@ -202,3 +202,23 @@ class ProductAPI(APIView):
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+class OrderAPI(APIView):
+
+    def get(self, request):
+        name = request.query_params.get("name", None)
+        id = request.query_params.get("id", None)
+        orders = Order.objects.all()
+        if name is not None:
+            orders = orders.filter(user__username__icontains=name)
+        if id is not None:
+            try:
+                orders = orders.get(id=id)
+            except Order.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
+            serializer = OrderSerilizers(orders)
+            return Response(serializer.data)
+
+        serializer = OrderSerilizers(orders, many=True)
+        return Response(serializer.data)

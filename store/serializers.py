@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from store.models import Category, Product
+from store.models import Category, Product, Order, OrderItem
 
 
 class CategorySerilizers(serializers.ModelSerializer):
@@ -27,8 +27,25 @@ class ProductSerilizers(serializers.ModelSerializer):
         fields = '__all__'
         # depth =1
 
-class ProductSerilizersPOST(serializers.ModelSerializer):
 
+class ProductSerilizersPOST(serializers.ModelSerializer):
     class Meta:
         model = Product
+        fields = '__all__'
+
+
+class OrderItemSerilizers(serializers.ModelSerializer):
+    product = ProductSerilizers()
+
+    class Meta:
+        model = OrderItem
+        exclude = ["created_at", "updated_at", "order"]
+        # fields = '__all__'
+
+
+class OrderSerilizers(serializers.ModelSerializer):
+    order_items = OrderItemSerilizers(many=True)
+
+    class Meta:
+        model = Order
         fields = '__all__'
