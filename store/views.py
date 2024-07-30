@@ -222,3 +222,13 @@ class OrderAPI(APIView):
 
         serializer = OrderSerilizers(orders, many=True)
         return Response(serializer.data)
+    def post(self,request):
+        data = request.data
+        if len(data["order_items"]) == 0:
+            return Response(data={"message": "order_items is required"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = OrderSerilizers(data=request.data,context={'request':request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
